@@ -52,8 +52,8 @@ uv run python terrain_export.py --i1 0 --j1 0 --i2 512 --j2 512 --no-climate -o 
 
 ## 工程说明
 
-- `vendor/terrain_diffusion/`：上游推理闭包原样拷贝（coarse→latent→decoder 三级扩散），包名与 import 未改，便于追踪上游
-- 气候 4 通道（t_season/precip/p_cv/beta）是 ~7.7 km 分辨率 coarse map 的双线性上采样，无扩散细化——设计如此，代表大尺度气候先验；`elev`/`temp` 经完整扩散管线，无网格痕迹
+- `vendor/terrain_diffusion/`：上游推理闭包（coarse→latent→decoder 三级扩散），包名与 import 未改，便于追踪上游
+- 气候 4 通道（t_season/precip/p_cv/beta）来自 ~7.7 km 分辨率 coarse map 的上采样，代表大尺度气候先验。已将上采样插值由双线性改为**双三次**（vendor 内唯一一处对上游的修改，见 `vendor/README.md`），消除粗单元边界的网格纹；`elev`/`temp` 经完整扩散管线，本无网格
 
 ## 致谢与许可
 

@@ -1353,7 +1353,7 @@ class WorldPipeline(ConfigMixin):
             
         features = torch.cat([temp_baseline, beta, central_coarse], dim=0).unsqueeze(0)
         
-        features_up = torch.nn.functional.grid_sample(features, grid, mode='bilinear', padding_mode='border', align_corners=False)
+        features_up = torch.nn.functional.grid_sample(features, grid, mode='bicubic', padding_mode='border', align_corners=False)
         features_up = features_up.squeeze(0)
         
         temp_baseline_up = features_up[0:1]
