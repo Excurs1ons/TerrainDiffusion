@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# uv
+.python-version
+
+# 运行时数据 (WorldClim/etopo/统计缓存, 首次运行自动下载/生成)
+data/global/
+
+# 训练用数据清单 (推理工具用不到)
+data/*.csv
+
+# 导出产物
+output/
+
+# 实验/临时
+exp*.png
+run_log.txt
+
+# IDE / 工具
+.idea/
+.vscode/
+.zcode/
+
+# OS
+Thumbs.db
+.DS_Store

@@ -1,0 +1,38 @@
+[project]
+name = "terraindiffusion"
+version = "0.1.0"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+dependencies = [
+    "pyzmq>=25.0",
+    "numpy<2.5",
+    "torch==2.8.0+cu128",
+    "torchvision==0.23.0+cu128",
+    "pyrefly>=0.60.0",
+    "rasterio>=1.5.0",
+    "ema-pytorch>=0.8.2",
+    "tifffile>=2026.1",
+    "pillow>=11.0",
+    # vendored terrain_diffusion 推理闭包的第三方依赖
+    "diffusers>=0.30.3",
+    "h5py>=3.12.1",
+    "infinite-tensor>=0.3.0",
+    "safetensors>=0.4.5",
+    "scikit-image>=0.24.0",
+    "scipy>=1.14.1",
+    "pyfastnoiselite==0.0.6",
+    "numba>=0.59",
+    "pyyaml>=6.0.1",
+    "matplotlib>=3.9.2",
+    "accelerate>=0.34.2",
+]
+
+[tool.uv]
+index-url = "https://pypi.tuna.tsinghua.edu.cn/simple"
+extra-index-url = ["https://download.pytorch.org/whl/cu128"]
+index-strategy = "unsafe-best-match"
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
