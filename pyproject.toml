@@ -25,6 +25,8 @@ dependencies = [
     "pyyaml>=6.0.1",
     "matplotlib>=3.9.2",
     "accelerate>=0.34.2",
+    # EXR 输出: 3.4.x/3.2.10 在 Windows+Py3.12 上 import 即 segfault, 3.2.3 验证可用
+    "openexr==3.2.3",
 ]
 
 [tool.uv]

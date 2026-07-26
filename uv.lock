@@ -1023,6 +1023,20 @@ wheels = [
 ]
 
 [[package]]
+name = "openexr"
+version = "3.2.3"
+source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
+sdist = { url = "https://pypi.tuna.tsinghua.edu.cn/packages/53/14/1bd85879b58532719d638b4194f4b4adffdc4821898a843c1c273058085f/openexr-3.2.3.tar.gz", hash = "sha256:c2798afd3440d1153d20c3ffe5a1d320cdf7da0146fb8d5de306498b5cdfa4aa", size = 1677777, upload-time = "2024-03-07T01:28:11.639Z" }
+wheels = [
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/bc/c1/b839b5242549bfead890b35add51c224a4e1372a0c26d91f04c836272fa2/openexr-3.2.3-cp312-cp312-macosx_10_9_universal2.macosx_10_9_x86_64.macosx_11_0_arm64.macosx_11_0_universal2.whl", hash = "sha256:172bdbd90958471ba5c1d6526aceafa891647ebd1629058c75c5f1f5a6184e76", size = 2096200, upload-time = "2024-03-07T01:27:31.56Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/79/14/39f6099fca2fc5df7ede46026d79b9b8d4872398c9fe4b3a460f546af177/openexr-3.2.3-cp312-cp312-macosx_10_9_x86_64.whl", hash = "sha256:63065806336aff77ca79b6f4c3da2454b13cfa96b04de5f1ad7d75a8f87d7bf6", size = 1073216, upload-time = "2024-03-07T01:27:33.996Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/e2/52/3fc57c73c52fe2bcc60019f31ce3685e11a76d16c7ec9eb2c1c19f6187ca/openexr-3.2.3-cp312-cp312-macosx_11_0_arm64.whl", hash = "sha256:896b948f28772331eb326811694707d50956464a51282cfa6609b4debdc3f57e", size = 1033402, upload-time = "2024-03-07T01:27:36.047Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/85/c0/a291b8813bd17d8c292e1b1a44b7b7fb71e60461a1d999a7198f192497d5/openexr-3.2.3-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:f28709ce40abafc90effbf279c9a0b6cc6f3a67979dd9d6034250cea9a6c47ad", size = 1099345, upload-time = "2024-03-07T01:27:38.401Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/fd/1b/2c5b4fbd128b66ead132dcf55d18750b8312c83ad799a46fb7cbc099c143/openexr-3.2.3-cp312-cp312-musllinux_1_1_x86_64.whl", hash = "sha256:e8dc6ac9704b3e411245c4675ca8b787ca855cec402c086a47193331227e43af", size = 1608371, upload-time = "2024-03-07T01:27:40.498Z" },
+    { url = "https://pypi.tuna.tsinghua.edu.cn/packages/19/6e/11eb8df6f28f62b14e568a96e422f014781b9537abd2f2c5f7437d0cbabe/openexr-3.2.3-cp312-cp312-win_amd64.whl", hash = "sha256:03eb4bab28794a7bee22299494e1ec05cd699a04fbc7f22a7498db9f01fa19ba", size = 760161, upload-time = "2024-03-07T01:27:41.951Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "26.2"
 source = { registry = "https://pypi.tuna.tsinghua.edu.cn/simple" }
@@ -1618,6 +1632,7 @@ dependencies = [
     { name = "matplotlib" },
     { name = "numba" },
     { name = "numpy" },
+    { name = "openexr" },
     { name = "pillow" },
     { name = "pyfastnoiselite" },
     { name = "pyrefly" },
@@ -1642,6 +1657,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.9.2" },
     { name = "numba", specifier = ">=0.59" },
     { name = "numpy", specifier = "<2.5" },
+    { name = "openexr", specifier = "==3.2.3" },
     { name = "pillow", specifier = ">=11.0" },
     { name = "pyfastnoiselite", specifier = "==0.0.6" },
     { name = "pyrefly", specifier = ">=0.60.0" },

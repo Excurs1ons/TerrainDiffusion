@@ -233,6 +233,33 @@ def _write_tiff_f32(path: str, arr: np.ndarray) -> None:
     img.save(path)
 
 
+def _write_exr_f32(path: str, arr: np.ndarray) -> None:
+    """写入单通道 32-bit float OpenEXR (通道名 'R')。
+
+    注意: openexr 3.4.x / 3.2.10 在 Windows+Py3.12 上 import 即 segfault,
+    本工具固定使用 3.2.3 (见 pyproject.toml)。
+    """
+    import Imath
+    import OpenEXR
+
+    a = np.ascontiguousarray(arr.astype(np.float32))
+    h, w = a.shape
+    header = OpenEXR.Header(w, h)
+    header['channels'] = {'R': Imath.Channel(Imath.PixelType(Imath.PixelType.FLOAT))}
+    out = OpenEXR.OutputFile(path, header)
+    try:
+        out.writePixels({'R': a.tobytes()})
+    finally:
+        out.close()
+
+
+# 格式 → (写入函数, 扩展名)
+_FORMAT_WRITERS = {
+    "tif": (_write_tiff_f32, ".tif"),
+    "exr": (_write_exr_f32, ".exr"),
+}
+
+
 def _write_normalized_png(path: str, arr: np.ndarray) -> None:
     """
     将 float 数组归一化到 0-255 并保存为 8-bit 灰度 PNG。
@@ -256,9 +283,10 @@ def export_terrain(
     with_climate: bool = True,
     vertical_scale: float = 1.0,
     normalize: bool = False,
+    fmt: str = "tif",
 ) -> dict:
     """
-    执行推理并输出 32-bit float TIFF，每个通道一个单独文件。
+    执行推理并输出 32-bit float 纹理，每个通道一个单独文件。
 
     内部流程:
         1. pipeline.get(i1,j1,i2,j2) 调用:
@@ -266,7 +294,7 @@ def export_terrain(
               - coarse map 分辨率 = 32×latent_compression 像素/block
               - 扩散模型在 coarse 条件引导下填充细节
               - 输出编码域高程: sign(z)·sqrt(|z|)，内部逆变换为真实海拔
-           b. _compute_climate(): 从 coarse map 双线性上采样气候特征
+           b. _compute_climate(): 从 coarse map 上采样气候特征
               - temp_baseline, beta 上采样到目标分辨率
               - temp_realistic = temp_baseline + beta × max(elev, 0)
               - 组装 5 通道: [temp, t_season, precip, p_cv, beta]
@@ -279,10 +307,10 @@ def export_terrain(
                         例如 (0,0,256,256) = 256×256 像素 = 7.68km × 7.68km
                         可超出全球范围，超出部分自动填充
         output_path:    输出路径文件名 (只用文件名主干, 忽略扩展名和中间目录)
-                        主干为 "output" 时落到 output/ 根: output/output_elev.tif 等
-                        其他主干落到 output/<stem>/: 例如 "big.tif" → output/big/big_elev.tif ...
+                        主干为 "output" 时落到 output/ 根: output/output_elev.<fmt> 等
+                        其他主干落到 output/<stem>/: 例如 "big.tif" → output/big/big_elev.<fmt> ...
         with_climate:   是否计算并导出气候数据（5 通道）
-                        False = 仅输出 _elev.tif
+                        False = 仅输出 _elev
         vertical_scale: 垂直缩放因子
                         高程值 × 此系数后写入文件
                         默认 1.0 = 1 像素 = 1 米
@@ -291,7 +319,10 @@ def export_terrain(
                         True = 每个通道额外生成 _xxx.png（灰度 0-255）
                         归一化: (val - min) / (max - min) × 255
                         可用普通图像查看器直接打开
-                        False = 仅输出 F32 TIFF（GPU 纹理用途）
+                        False = 仅输出主格式（GPU 纹理用途）
+        fmt:            主输出格式 "tif" / "exr"（均为 32-bit float 单通道）
+                        tif = F32 TIFF (默认, 通用)
+                        exr = F32 OpenEXR (通道名 'R', 影视/HDR 管线和部分 DCC 更友好)
 
     Returns:
         dict with keys:
@@ -299,7 +330,11 @@ def export_terrain(
             height: 输出高度 (像素)
             paths:  生成的文件路径列表
     """
-    print(f"Inferring terrain [{i1}:{i2}, {j1}:{j2}]...")
+    if fmt not in _FORMAT_WRITERS:
+        raise ValueError(f"Unsupported format {fmt!r}, choose from {sorted(_FORMAT_WRITERS)}")
+    write_f32, ext = _FORMAT_WRITERS[fmt]
+
+    print(f"Inferring terrain [{i1}:{i2}, {j1}:{j2}] (format={fmt})...")
     t0 = time.perf_counter()
 
     # pipeline.get() 返回:
@@ -324,8 +359,8 @@ def export_terrain(
     stem = _resolve_output_stem(output_path)
     paths = []
 
-    elev_path = f"{stem}_elev.tif"
-    _write_tiff_f32(elev_path, elev_np)
+    elev_path = f"{stem}_elev{ext}"
+    write_f32(elev_path, elev_np)
     print(f"  Written: {elev_path} ({os.path.getsize(elev_path)/1024:.1f}KB) [elev]")
     paths.append(elev_path)
     if normalize:
@@ -390,8 +425,8 @@ def export_terrain(
         climate_np = climate.cpu().numpy().astype(np.float32)  # (5, H, W)
         climate_names = ["temp", "t_season", "precip", "p_cv", "beta"]
         for idx, name in enumerate(climate_names):
-            p = f"{stem}_{name}.tif"
-            _write_tiff_f32(p, climate_np[idx])
+            p = f"{stem}_{name}{ext}"
+            write_f32(p, climate_np[idx])
             print(f"  Written: {p} ({os.path.getsize(p)/1024:.1f}KB) [{name}]")
             paths.append(p)
             if normalize:
@@ -430,6 +465,9 @@ def main():
 
   # 输出 F32 TIFF + 归一化 PNG 预览（可用图片查看器打开）
   python terrain_export.py --i1 0 --j1 0 --i2 256 --j2 256 --normalize -o output.tif
+
+  # 输出 OpenEXR (F32, 通道名 'R')
+  python terrain_export.py --i1 0 --j1 0 --i2 256 --j2 256 --format exr -o output.tif
 """)
 
     # 模型与推理参数
@@ -463,8 +501,10 @@ def main():
                         help="仅输出高程, 不计算/导出气候数据 (5 通道)")
     parser.add_argument("--normalize", action="store_true",
                         help="额外输出归一化 PNG 预览图 (灰度 0-255, 可直接查看)")
+    parser.add_argument("--format", choices=["tif", "exr"], default="tif",
+                        help="主输出格式: tif=F32 TIFF (默认), exr=F32 OpenEXR (通道 'R')")
     parser.add_argument("-o", "--output", default="output.tif",
-                        help="输出文件名 (只用主干; 'output' → output/ 根, 其他 → output/<stem>/<stem>_*.tif)")
+                        help="输出文件名 (只用主干; 'output' → output/ 根, 其他 → output/<stem>/<stem>_*)")
     args = parser.parse_args()
 
     pipeline = build_pipeline(
@@ -483,6 +523,7 @@ def main():
         with_climate=not args.no_climate,
         vertical_scale=args.vertical_scale,
         normalize=args.normalize,
+        fmt=args.format,
     )
 
 

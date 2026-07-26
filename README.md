@@ -23,9 +23,12 @@ uv run python terrain_export.py --i1 0 --j1 0 --i2 1024 --j2 1024 --seed 42 --dt
 
 # 仅高程
 uv run python terrain_export.py --i1 0 --j1 0 --i2 512 --j2 512 --no-climate -o elev.tif
+
+# OpenEXR 输出 (F32, 通道 'R')
+uv run python terrain_export.py --i1 0 --j1 0 --i2 256 --j2 256 --format exr -o out.tif
 ```
 
-`-o out.tif` → `output/out/out_elev.tif` 等（`-o output.tif` 则落到 `output/` 根）。完整参数见 `--help`。
+`-o out.tif` → `output/out/out_elev.tif` 等（`-o output.tif` 则落到 `output/` 根）。`--format tif`（默认）/ `exr`，均为 32-bit float 单通道，数值完全等价。完整参数见 `--help`。
 
 ## 输出通道
 
@@ -54,6 +57,7 @@ uv run python terrain_export.py --i1 0 --j1 0 --i2 512 --j2 512 --no-climate -o 
 
 - `vendor/terrain_diffusion/`：上游推理闭包（coarse→latent→decoder 三级扩散），包名与 import 未改，便于追踪上游
 - 气候 4 通道（t_season/precip/p_cv/beta）来自 ~7.7 km 分辨率 coarse map 的上采样，代表大尺度气候先验。已将上采样插值由双线性改为**双三次**（vendor 内唯一一处对上游的修改，见 `vendor/README.md`），消除粗单元边界的网格纹；`elev`/`temp` 经完整扩散管线，本无网格
+- **EXR 依赖固定 `openexr==3.2.3`**：上游 3.4.x / 3.2.10 在 Windows + Python 3.12 上 `import OpenEXR` 即 segfault（native 崩溃），3.2.3 经写入+回读验证可用
 
 ## 致谢与许可
 
