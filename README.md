@@ -57,6 +57,7 @@ uv run python terrain_export.py --i1 0 --j1 0 --i2 256 --j2 256 --format exr -o 
 
 - `vendor/terrain_diffusion/`：上游推理闭包（coarse→latent→decoder 三级扩散），包名与 import 未改，便于追踪上游
 - 气候 4 通道（t_season/precip/p_cv/beta）来自 ~7.7 km 分辨率 coarse map 的上采样，代表大尺度气候先验。已将上采样插值由双线性改为**双三次**（vendor 内唯一一处对上游的修改，见 `vendor/README.md`），消除粗单元边界的网格纹；`elev`/`temp` 经完整扩散管线，本无网格
+  - **注意（值域敏感场景）**：双三次插值在极值附近有轻微 overshoot，可能让 `precip` 等通道略微超出原始数据范围。若下游用途对值域敏感，可在 `terrain_export.py` 导出时对气候通道 clip 到 coarse map 的 min/max
 - **EXR 依赖固定 `openexr==3.2.3`**：上游 3.4.x / 3.2.10 在 Windows + Python 3.12 上 `import OpenEXR` 即 segfault（native 崩溃），3.2.3 经写入+回读验证可用
 
 ## 致谢与许可
