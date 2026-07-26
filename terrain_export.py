@@ -100,8 +100,8 @@ warnings.filterwarnings("ignore", message=".*local_dir_use_symlinks.*")
 
 # 使用 hf-mirror 镜像 HuggingFace，避免 SSL / 网络问题
 os.environ.setdefault("HF_ENDPOINT", "https://hf-mirror.com")
-# 模型缓存统一放 F 盘
-os.environ.setdefault("HF_HOME", r"F:\.hf_cache")
+# 模型缓存目录
+os.environ.setdefault("HF_HOME", os.path.expanduser("~/.hf_cache"))
 
 import numpy as np
 import torch
